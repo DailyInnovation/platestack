@@ -36,7 +36,7 @@ export function PlateButtons({ plates, onAddPlate, onClearBar, maxPlateConfig }:
       </div>
       <div className="grid grid-cols-4 gap-2">
         {plates.map((plate) => {
-          const isDisabled = maxPlateConfig?.enabled && maxPlateConfig.maxPlateWeight && plate.weight > maxPlateConfig.maxPlateWeight;
+          const isDisabled = !!(maxPlateConfig?.enabled && maxPlateConfig.maxPlateWeight != null && plate.weight > maxPlateConfig.maxPlateWeight);
 
           return (
             <button

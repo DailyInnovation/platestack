@@ -20,7 +20,7 @@ export function usePlateCalculator() {
   const [manualPlates, setManualPlatesState] = useState<LoadedPlate[]>([]);
   const [barType, setBarType] = useState<BarType>('standard');
   const [customBarWeight, setCustomBarWeight] = useState<string>('');
-  const [maxPlateConfig, setMaxPlateConfig] = useState<MaxPlateConfig>({
+  const [maxPlateConfig, setMaxPlateConfigState] = useState<MaxPlateConfig>({
     enabled: false,
     maxPlateWeight: null,
   });
@@ -66,6 +66,25 @@ export function usePlateCalculator() {
     return parseFloat(targetWeightState) || barbellConfig.weight;
   }, [targetWeightState, manualPlates, barbellConfig]);
 
+  // When max plate limit changes, remove any manual plates that now violate it
+  const setMaxPlateConfig = (config: MaxPlateConfig) => {
+    setMaxPlateConfigState(config);
+    if (config.enabled && config.maxPlateWeight != null) {
+      setManualPlatesState(prev => {
+        const filtered = prev.filter(p => p.weight <= config.maxPlateWeight!);
+        if (filtered.length !== prev.length) {
+          if (filtered.length > 0) {
+            const newTotal = calculateTotalWeight(filtered, barbellConfig.weight);
+            setTargetWeightState(String(newTotal));
+          } else {
+            setTargetWeightState('');
+          }
+        }
+        return filtered;
+      });
+    }
+  };
+
   const toggleUnit = () => {
     const newUnit = unit === 'kg' ? 'lbs' : 'kg';
 
@@ -87,7 +106,7 @@ export function usePlateCalculator() {
       const closestPlate = availablePlates.reduce((prev, curr) =>
         Math.abs(curr.weight - convertedMaxPlate) < Math.abs(prev.weight - convertedMaxPlate) ? curr : prev
       );
-      setMaxPlateConfig({ enabled: true, maxPlateWeight: closestPlate.weight });
+      setMaxPlateConfigState({ enabled: true, maxPlateWeight: closestPlate.weight });
     }
 
     setManualPlatesState([]);
@@ -106,10 +125,8 @@ export function usePlateCalculator() {
         ? prev.map(p => p.weight === plateWeight ? { ...p, count: p.count + 1 } : p)
         : [...prev, { ...plate, count: 1 }];
 
-      // Sync target weight to the new manual total so warmup, percentage tools all update
       const newTotal = calculateTotalWeight(newPlates, barbellConfig.weight);
       setTargetWeightState(String(newTotal));
-
       return newPlates;
     });
   };

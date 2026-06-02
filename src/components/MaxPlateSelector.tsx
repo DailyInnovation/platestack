@@ -58,7 +58,7 @@ export function MaxPlateSelector({
         <div className="space-y-2">
           <label className="text-xs text-gray-400">Maximum plate to use</label>
           <div className="grid grid-cols-4 gap-1.5">
-            {plates.slice(0, 5).map((plate) => (
+            {plates.slice(1).map((plate) => (
               <button
                 key={plate.weight}
                 onClick={() => handleMaxPlateWeightChange(plate.weight)}
