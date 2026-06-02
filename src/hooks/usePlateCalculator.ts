@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { UnitSystem, LoadedPlate, BarType, MaxPlateConfig } from '../types';
 import {
   getPlatesByUnit,
@@ -16,8 +16,8 @@ const STORAGE_KEY = 'platestack_premium_unlocked';
 
 export function usePlateCalculator() {
   const [unit, setUnit] = useState<UnitSystem>('kg');
-  const [targetWeight, setTargetWeight] = useState<string>('');
-  const [manualPlates, setManualPlates] = useState<LoadedPlate[]>([]);
+  const [targetWeightState, setTargetWeightState] = useState<string>('');
+  const [manualPlates, setManualPlatesState] = useState<LoadedPlate[]>([]);
   const [barType, setBarType] = useState<BarType>('standard');
   const [customBarWeight, setCustomBarWeight] = useState<string>('');
   const [maxPlateConfig, setMaxPlateConfig] = useState<MaxPlateConfig>({
@@ -41,39 +41,38 @@ export function usePlateCalculator() {
     return BARBELL_CONFIGS[unit][barType];
   }, [unit, barType, customBarWeight]);
 
+  // When user types a target weight → clear manual plates so auto-calculation takes over
+  const setTargetWeight = (val: string) => {
+    setManualPlatesState([]);
+    setTargetWeightState(val);
+  };
+
   const platesPerSide = useMemo(() => {
     if (manualPlates.length > 0) {
       return manualPlates;
     }
-    const weight = parseFloat(targetWeight);
+    const weight = parseFloat(targetWeightState);
     if (!weight || weight <= barbellConfig.weight) {
       return [];
     }
     const maxWeight = maxPlateConfig.enabled ? maxPlateConfig.maxPlateWeight : undefined;
     return calculatePlatesPerSide(weight, barbellConfig.weight, currentPlates, maxWeight);
-  }, [targetWeight, manualPlates, barbellConfig, currentPlates, maxPlateConfig]);
+  }, [targetWeightState, manualPlates, barbellConfig, currentPlates, maxPlateConfig]);
 
   const totalWeight = useMemo(() => {
     if (manualPlates.length > 0) {
       return calculateTotalWeight(manualPlates, barbellConfig.weight);
     }
-    return parseFloat(targetWeight) || barbellConfig.weight;
-  }, [targetWeight, manualPlates, barbellConfig]);
-
-  // Clear manual plates when target weight changes
-  useEffect(() => {
-    if (targetWeight && manualPlates.length > 0) {
-      setManualPlates([]);
-    }
-  }, [targetWeight]);
+    return parseFloat(targetWeightState) || barbellConfig.weight;
+  }, [targetWeightState, manualPlates, barbellConfig]);
 
   const toggleUnit = () => {
     const newUnit = unit === 'kg' ? 'lbs' : 'kg';
 
-    if (targetWeight) {
-      const currentWeight = parseFloat(targetWeight);
+    if (targetWeightState) {
+      const currentWeight = parseFloat(targetWeightState);
       const convertedWeight = convertWeight(currentWeight, unit, newUnit);
-      setTargetWeight(convertedWeight.toString());
+      setTargetWeightState(convertedWeight.toString());
     }
 
     if (customBarWeight) {
@@ -91,29 +90,33 @@ export function usePlateCalculator() {
       setMaxPlateConfig({ enabled: true, maxPlateWeight: closestPlate.weight });
     }
 
-    setManualPlates([]);
+    setManualPlatesState([]);
     setUnit(newUnit);
   };
 
+  // When plates are manually tapped → add plate and sync target weight to new total
   const manualAddPlate = (plateWeight: number): void => {
     const plate = currentPlates.find(p => p.weight === plateWeight);
     if (!plate) return;
-    if (maxPlateConfig.enabled && maxPlateConfig.maxPlateWeight && plateWeight > maxPlateConfig.maxPlateWeight) {
-      return;
-    }
-    setManualPlates(prev => {
+    if (maxPlateConfig.enabled && maxPlateConfig.maxPlateWeight && plateWeight > maxPlateConfig.maxPlateWeight) return;
+
+    setManualPlatesState(prev => {
       const existing = prev.find(p => p.weight === plateWeight);
-      if (existing) {
-        return prev.map(p => p.weight === plateWeight ? { ...p, count: p.count + 1 } : p);
-      }
-      return [...prev, { ...plate, count: 1 }];
+      const newPlates = existing
+        ? prev.map(p => p.weight === plateWeight ? { ...p, count: p.count + 1 } : p)
+        : [...prev, { ...plate, count: 1 }];
+
+      // Sync target weight to the new manual total so warmup, percentage tools all update
+      const newTotal = calculateTotalWeight(newPlates, barbellConfig.weight);
+      setTargetWeightState(String(newTotal));
+
+      return newPlates;
     });
-    setTargetWeight('');
   };
 
   const clearBar = () => {
-    setManualPlates([]);
-    setTargetWeight('');
+    setManualPlatesState([]);
+    setTargetWeightState('');
   };
 
   const unlockPremium = () => {
@@ -124,7 +127,7 @@ export function usePlateCalculator() {
   return {
     unit,
     toggleUnit,
-    targetWeight,
+    targetWeight: targetWeightState,
     setTargetWeight,
     manualPlates,
     manualAddPlate,
