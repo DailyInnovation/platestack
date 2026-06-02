@@ -1,81 +1,95 @@
 import { ReactNode } from 'react';
-import { Lock, Check, Sparkles } from 'lucide-react';
+import { Lock, Check, Zap, Flame, SlidersHorizontal, Percent } from 'lucide-react';
 
 interface PremiumPaywallProps {
   isUnlocked: boolean;
   children: ReactNode;
 }
 
-export function PremiumPaywall({ isUnlocked, children }: PremiumPaywallProps) {
+const FEATURES = [
+  {
+    icon: Flame,
+    title: 'Smart Warmup Builder',
+    desc: 'Auto-generates warmup sets with a fully editable protocol',
+  },
+  {
+    icon: SlidersHorizontal,
+    title: 'Specialty Bar Support',
+    desc: 'Technique, squat, and custom bar weights',
+  },
+  {
+    icon: Percent,
+    title: 'Dynamic % Calculator',
+    desc: 'Slide to any % — see exact plates on a live barbell',
+  },
+];
 
+export function PremiumPaywall({ isUnlocked, children }: PremiumPaywallProps) {
   if (isUnlocked) {
     return <>{children}</>;
   }
 
   return (
     <div className="relative">
-      {/* Blurred content */}
-      <div className="filter blur-sm pointer-events-none select-none opacity-60">
+      {/* Blurred preview of content behind */}
+      <div className="filter blur-sm pointer-events-none select-none opacity-50">
         {children}
       </div>
 
-      {/* Glassmorphism overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/60 to-slate-900/70 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-2xl pointer-events-auto">
-        <div className="absolute inset-0 bg-gradient-to-br from-neon-green/5 to-neon-cyan/5 rounded-xl pointer-events-none"></div>
+      {/* Overlay */}
+      <div className="absolute inset-0 rounded-xl pointer-events-auto overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
 
-        {/* Locked badge */}
-        <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-700/50">
-          <Lock className="w-3 h-3 text-neon-green" />
-          <span className="text-[10px] font-bold text-gray-300">PRO PACK</span>
-        </div>
+        {/* Subtle gradient border */}
+        <div className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
 
-        {/* Premium card */}
-        <div className="absolute inset-0 flex items-center justify-center p-3">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-4 border border-slate-700/50 shadow-2xl w-full max-w-xs">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Sparkles className="w-5 h-5 text-neon-cyan animate-pulse" />
-              <h3 className="text-lg font-bold bg-gradient-to-r from-neon-green to-neon-cyan bg-clip-text text-transparent">
-                Upgrade to Pro
-              </h3>
-            </div>
+        {/* Top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neon-green/60 to-transparent" />
 
-            <div className="text-center mb-3">
-              <div className="text-2xl font-black text-white mb-1">
-                Unlock Premium Features
-              </div>
-              <div className="text-3xl font-black bg-gradient-to-r from-neon-green to-emerald-400 bg-clip-text text-transparent">
-                $3/month
-              </div>
-            </div>
-
-            <div className="space-y-1 mb-3">
-              {[
-                'Automated warmup jumps',
-                'Specialty bar support',
-                'Percentage matrices',
-              ].map((feature, idx) => (
-                <div key={idx} className="flex items-center gap-2 text-xs text-gray-300">
-                  <div className="w-4 h-4 rounded-full bg-neon-green/20 flex items-center justify-center flex-shrink-0">
-                    <Check className="w-2.5 h-2.5 text-neon-green" />
-                  </div>
-                  <span>{feature}</span>
-                </div>
-              ))}
-            </div>
-
-            <a
-              href="https://dailyinnovation12.lemonsqueezy.com/checkout/buy/b84ffec5-e864-46a0-a5e5-965310c96a43?embed=1"
-              className="lemonsqueezy-button w-full py-2.5 px-4 rounded-lg font-bold text-sm transition-all shadow-lg bg-gradient-to-r from-neon-green to-emerald-500 hover:from-neon-green hover:to-emerald-400 text-slate-900 shadow-neon active:scale-95 text-center no-underline block"
-            >
-              Upgrade to Pro ($3/month)
-            </a>
-
-            <div className="mt-2 text-center">
-              <span className="text-[10px] text-gray-500">
-                Secure checkout by Lemon Squeezy
-              </span>
-            </div>
+        {/* Card content */}
+        <div className="relative flex flex-col items-center justify-center h-full px-4 py-5 text-center">
+          {/* Lock badge */}
+          <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700 rounded-full px-3 py-1 mb-4">
+            <Lock className="w-3 h-3 text-neon-green" />
+            <span className="text-[10px] font-black tracking-widest text-gray-300 uppercase">Pro Features</span>
           </div>
+
+          {/* Headline */}
+          <h3 className="text-xl font-black text-white mb-0.5 leading-tight">
+            Train Smarter
+          </h3>
+          <p className="text-xs text-gray-500 mb-4 max-w-[220px]">
+            Unlock the full toolkit — warmup protocols, specialty bars, and live plate previews.
+          </p>
+
+          {/* Feature list */}
+          <div className="w-full max-w-[260px] space-y-2 mb-5">
+            {FEATURES.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex items-start gap-2.5 text-left">
+                <div className="w-6 h-6 rounded-md bg-neon-green/15 border border-neon-green/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Icon className="w-3 h-3 text-neon-green" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white leading-tight">{title}</div>
+                  <div className="text-[10px] text-gray-500 leading-tight">{desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <a
+            href="https://dailyinnovation12.lemonsqueezy.com/checkout/buy/b84ffec5-e864-46a0-a5e5-965310c96a43?embed=1"
+            className="lemonsqueezy-button w-full max-w-[260px] flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-black text-sm text-slate-900 bg-gradient-to-r from-neon-green to-emerald-400 hover:from-emerald-400 hover:to-neon-green active:scale-95 transition-all shadow-lg shadow-neon-green/20 no-underline"
+          >
+            <Zap className="w-4 h-4" />
+            Unlock Pro — $3/month
+          </a>
+
+          <p className="text-[10px] text-gray-600 mt-2.5">
+            Secure checkout · Cancel anytime
+          </p>
         </div>
       </div>
     </div>
