@@ -47,22 +47,31 @@ export function calculateTotalWeight(
   return barbellWeight + platesWeight;
 }
 
+// Science-backed warmup protocol: 50/65/80/90% with tapering reps (5/3/2/1)
+// Source: Joe Kenn NFL protocol + peer-reviewed warmup literature
+// Progressively heavier loads with fewer reps prime CNS without pre-fatiguing
+const WARMUP_PROTOCOL = [
+  { percentage: 0.50, reps: 5, label: 'Activation' },
+  { percentage: 0.65, reps: 3, label: 'Build' },
+  { percentage: 0.80, reps: 2, label: 'Primer' },
+  { percentage: 0.90, reps: 1, label: 'Final Prep' },
+];
+
 export function generateWarmupSets(
   targetWeight: number,
   barbellWeight: number,
   plates: PlateDenomination[],
   maxPlateWeight?: number | null
 ): WarmupSet[] {
-  const percentages = [0.4, 0.55, 0.7, 0.85];
-
-  return percentages.map(percentage => {
+  return WARMUP_PROTOCOL.map(({ percentage, reps, label }) => {
     const weight = Math.round((targetWeight * percentage) / 2.5) * 2.5;
     const warmupPlates = calculatePlatesPerSide(weight, barbellWeight, plates, maxPlateWeight);
-
     return {
       percentage: Math.round(percentage * 100),
       weight,
       plates: warmupPlates,
+      reps,
+      label,
     };
   });
 }

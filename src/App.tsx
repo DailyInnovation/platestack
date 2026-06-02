@@ -88,7 +88,7 @@ function App() {
             plates={currentPlates}
             unit={unit}
           />
-          <WarmupBuilder warmupSets={warmupSets} unit={unit} />
+          <WarmupBuilder warmupSets={warmupSets} unit={unit} targetWeight={targetWeight} />
           <SpecialtyBars
             barType={barType}
             onBarTypeChange={setBarType}
