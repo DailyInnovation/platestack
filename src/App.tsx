@@ -6,8 +6,7 @@ import { PlateButtons } from './components/PlateButtons';
 import { BarbellGraphic } from './components/BarbellGraphic';
 import { WarmupBuilder } from './components/WarmupBuilder';
 import { SpecialtyBars } from './components/SpecialtyBars';
-import { PercentageMatrix } from './components/PercentageMatrix';
-import { PremiumPaywall } from './components/PremiumPaywall';
+import { PercentageSelector } from './components/PercentageSelector';
 import { MaxPlateSelector } from './components/MaxPlateSelector';
 import { Dumbbell } from 'lucide-react';
 
@@ -17,6 +16,7 @@ function App() {
       window.createLemonSqueezy();
     }
   }, []);
+
   const {
     unit,
     toggleUnit,
@@ -34,9 +34,6 @@ function App() {
     totalWeight,
     currentPlates,
     warmupSets,
-    percentageMatrix,
-    isPremiumUnlocked,
-    unlockPremium,
     maxPlateConfig,
     setMaxPlateConfig,
   } = usePlateCalculator();
@@ -83,7 +80,7 @@ function App() {
           maxPlateConfig={maxPlateConfig}
         />
 
-        {/* Premium Features Section */}
+        {/* All Features */}
         <div className="mt-4 space-y-2">
           <MaxPlateSelector
             maxPlateConfig={maxPlateConfig}
@@ -91,19 +88,21 @@ function App() {
             plates={currentPlates}
             unit={unit}
           />
-          <PremiumPaywall isUnlocked={isPremiumUnlocked}>
-            <div className="space-y-2">
-              <WarmupBuilder warmupSets={warmupSets} unit={unit} />
-              <SpecialtyBars
-                barType={barType}
-                onBarTypeChange={setBarType}
-                customBarWeight={customBarWeight}
-                onCustomBarWeightChange={setCustomBarWeight}
-                unit={unit}
-              />
-              <PercentageMatrix percentageRows={percentageMatrix} unit={unit} />
-            </div>
-          </PremiumPaywall>
+          <WarmupBuilder warmupSets={warmupSets} unit={unit} />
+          <SpecialtyBars
+            barType={barType}
+            onBarTypeChange={setBarType}
+            customBarWeight={customBarWeight}
+            onCustomBarWeightChange={setCustomBarWeight}
+            unit={unit}
+          />
+          <PercentageSelector
+            targetWeight={targetWeight}
+            barbellWeight={barbellConfig.weight}
+            plates={currentPlates}
+            unit={unit}
+            maxPlateWeight={maxPlateConfig.enabled ? maxPlateConfig.maxPlateWeight : null}
+          />
         </div>
       </div>
     </div>
