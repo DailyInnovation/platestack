@@ -88,7 +88,13 @@ function App() {
             plates={currentPlates}
             unit={unit}
           />
-          <WarmupBuilder warmupSets={warmupSets} unit={unit} targetWeight={targetWeight} />
+          <WarmupBuilder
+            targetWeight={targetWeight}
+            barbellWeight={barbellConfig.weight}
+            plates={currentPlates}
+            unit={unit}
+            maxPlateWeight={maxPlateConfig.enabled ? maxPlateConfig.maxPlateWeight : null}
+          />
           <SpecialtyBars
             barType={barType}
             onBarTypeChange={setBarType}

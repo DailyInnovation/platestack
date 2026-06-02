@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { UnitSystem, LoadedPlate, BarType, WarmupSet, PercentageRow, MaxPlateConfig } from '../types';
+import { UnitSystem, LoadedPlate, BarType, MaxPlateConfig } from '../types';
 import {
   getPlatesByUnit,
   DEFAULT_BARBELL_KG,
@@ -10,8 +10,6 @@ import {
 import {
   calculatePlatesPerSide,
   calculateTotalWeight,
-  generateWarmupSets,
-  generatePercentageMatrix,
 } from '../utils/calculations';
 
 const STORAGE_KEY = 'platestack_premium_unlocked';
@@ -47,12 +45,10 @@ export function usePlateCalculator() {
     if (manualPlates.length > 0) {
       return manualPlates;
     }
-
     const weight = parseFloat(targetWeight);
     if (!weight || weight <= barbellConfig.weight) {
       return [];
     }
-
     const maxWeight = maxPlateConfig.enabled ? maxPlateConfig.maxPlateWeight : undefined;
     return calculatePlatesPerSide(weight, barbellConfig.weight, currentPlates, maxWeight);
   }, [targetWeight, manualPlates, barbellConfig, currentPlates, maxPlateConfig]);
@@ -63,22 +59,6 @@ export function usePlateCalculator() {
     }
     return parseFloat(targetWeight) || barbellConfig.weight;
   }, [targetWeight, manualPlates, barbellConfig]);
-
-  const warmupSets = useMemo(() => {
-    if (!targetWeight) return [];
-    const weight = parseFloat(targetWeight);
-    if (!weight) return [];
-    const maxWeight = maxPlateConfig.enabled ? maxPlateConfig.maxPlateWeight : undefined;
-    return generateWarmupSets(weight, barbellConfig.weight, currentPlates, maxWeight);
-  }, [targetWeight, barbellConfig, currentPlates, maxPlateConfig]);
-
-  const percentageMatrix = useMemo(() => {
-    if (!targetWeight) return [];
-    const weight = parseFloat(targetWeight);
-    if (!weight) return [];
-    const maxWeight = maxPlateConfig.enabled ? maxPlateConfig.maxPlateWeight : undefined;
-    return generatePercentageMatrix(weight, barbellConfig.weight, currentPlates, maxWeight);
-  }, [targetWeight, barbellConfig, currentPlates, maxPlateConfig]);
 
   // Clear manual plates when target weight changes
   useEffect(() => {
@@ -102,20 +82,15 @@ export function usePlateCalculator() {
       setCustomBarWeight(convertedCustom.toString());
     }
 
-    // Convert max plate weight if set
     if (maxPlateConfig.enabled && maxPlateConfig.maxPlateWeight) {
       const convertedMaxPlate = convertWeight(maxPlateConfig.maxPlateWeight, unit, newUnit);
       const availablePlates = getPlatesByUnit(newUnit);
       const closestPlate = availablePlates.reduce((prev, curr) =>
         Math.abs(curr.weight - convertedMaxPlate) < Math.abs(prev.weight - convertedMaxPlate) ? curr : prev
       );
-      setMaxPlateConfig({
-        enabled: true,
-        maxPlateWeight: closestPlate.weight,
-      });
+      setMaxPlateConfig({ enabled: true, maxPlateWeight: closestPlate.weight });
     }
 
-    // Reset manual plates on unit change
     setManualPlates([]);
     setUnit(newUnit);
   };
@@ -123,22 +98,16 @@ export function usePlateCalculator() {
   const manualAddPlate = (plateWeight: number): void => {
     const plate = currentPlates.find(p => p.weight === plateWeight);
     if (!plate) return;
-
-    // Check if plate respects max plate config
     if (maxPlateConfig.enabled && maxPlateConfig.maxPlateWeight && plateWeight > maxPlateConfig.maxPlateWeight) {
       return;
     }
-
     setManualPlates(prev => {
       const existing = prev.find(p => p.weight === plateWeight);
       if (existing) {
-        return prev.map(p =>
-          p.weight === plateWeight ? { ...p, count: p.count + 1 } : p
-        );
+        return prev.map(p => p.weight === plateWeight ? { ...p, count: p.count + 1 } : p);
       }
       return [...prev, { ...plate, count: 1 }];
     });
-
     setTargetWeight('');
   };
 
@@ -168,8 +137,6 @@ export function usePlateCalculator() {
     platesPerSide,
     totalWeight,
     currentPlates,
-    warmupSets,
-    percentageMatrix,
     isPremiumUnlocked,
     unlockPremium,
     maxPlateConfig,

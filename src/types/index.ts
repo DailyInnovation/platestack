@@ -34,7 +34,6 @@ export interface WarmupSet {
   weight: number;
   plates: LoadedPlate[];
   reps: number;
-  label: string;
 }
 
 export interface PercentageRow {
