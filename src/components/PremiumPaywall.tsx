@@ -59,14 +59,14 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
   };
 
   return (
-    <div className="relative">
+    <div className="relative min-h-[600px]">
       {/* Blurred preview of content behind */}
       <div className="filter blur-sm pointer-events-none select-none opacity-50">
         {children}
       </div>
 
       {/* Overlay */}
-      <div className="absolute inset-0 rounded-xl pointer-events-auto overflow-hidden">
+      <div className="absolute inset-0 rounded-xl pointer-events-auto overflow-y-auto">
         {/* Background */}
         <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
 
@@ -77,7 +77,7 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neon-green/60 to-transparent" />
 
         {/* Card content */}
-        <div className="relative flex flex-col items-center justify-center h-full px-4 py-5 text-center">
+        <div className="relative flex flex-col items-center justify-center min-h-full px-4 py-5 text-center">
           {/* Lock badge */}
           <div className="flex items-center gap-1.5 bg-slate-800/80 border border-slate-700 rounded-full px-3 py-1 mb-4">
             <Lock className="w-3 h-3 text-neon-green" />
