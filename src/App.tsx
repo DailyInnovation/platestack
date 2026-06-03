@@ -35,6 +35,7 @@ function App() {
     totalWeight,
     currentPlates,
     isPremiumUnlocked,
+    unlockPremium,
     maxPlateConfig,
     setMaxPlateConfig,
   } = usePlateCalculator();
@@ -88,7 +89,7 @@ function App() {
           />
 
           {/* Premium features */}
-          <PremiumPaywall isUnlocked={isPremiumUnlocked}>
+          <PremiumPaywall isUnlocked={isPremiumUnlocked} onUnlock={unlockPremium}>
             <div className="space-y-2">
               <WarmupBuilder
                 targetWeight={targetWeight}
@@ -114,6 +115,22 @@ function App() {
             </div>
           </PremiumPaywall>
         </div>
+      </div>
+      {/* Footer */}
+      <div className="w-full max-w-md mt-8 pb-4 flex items-center justify-center gap-4">
+        <a
+          href="/privacy"
+          className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors"
+        >
+          Privacy Policy
+        </a>
+        <span className="text-gray-700 text-[10px]">·</span>
+        <a
+          href="/terms"
+          className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors"
+        >
+          Terms of Use
+        </a>
       </div>
     </div>
   );

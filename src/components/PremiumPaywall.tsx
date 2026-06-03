@@ -1,9 +1,10 @@
-import { ReactNode } from 'react';
-import { Lock, Check, Zap, Flame, SlidersHorizontal, Percent } from 'lucide-react';
+import { ReactNode, useState } from 'react';
+import { Lock, Check, Zap, Flame, SlidersHorizontal, Percent, Key, Loader2 } from 'lucide-react';
 
 interface PremiumPaywallProps {
   isUnlocked: boolean;
   children: ReactNode;
+  onUnlock: () => void;
 }
 
 const FEATURES = [
@@ -24,10 +25,38 @@ const FEATURES = [
   },
 ];
 
-export function PremiumPaywall({ isUnlocked, children }: PremiumPaywallProps) {
+export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywallProps) {
+  const [licenseKey, setLicenseKey] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+
   if (isUnlocked) {
     return <>{children}</>;
   }
+
+  const handleActivate = async () => {
+    const key = licenseKey.trim();
+    if (!key) return;
+    setStatus('loading');
+    setErrorMsg('');
+    try {
+      const res = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ license_key: key, instance_name: 'PlateStack' }),
+      });
+      const data = await res.json();
+      if (data.activated || data.license_key?.status === 'active') {
+        onUnlock();
+      } else {
+        setStatus('error');
+        setErrorMsg(data.error || 'Invalid or expired license key.');
+      }
+    } catch {
+      setStatus('error');
+      setErrorMsg('Could not verify key. Check your connection.');
+    }
+  };
 
   return (
     <div className="relative">
@@ -87,9 +116,38 @@ export function PremiumPaywall({ isUnlocked, children }: PremiumPaywallProps) {
             Unlock Pro — $3/month
           </a>
 
-          <p className="text-[10px] text-gray-600 mt-2.5">
+          <p className="text-[10px] text-gray-600 mt-2 mb-4">
             Secure checkout · Cancel anytime
           </p>
+
+          {/* License key input */}
+          <div className="w-full max-w-[260px]">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Key className="w-3 h-3 text-gray-500" />
+              <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Already have a key?</span>
+            </div>
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                value={licenseKey}
+                onChange={e => { setLicenseKey(e.target.value); setStatus('idle'); setErrorMsg(''); }}
+                onKeyDown={e => e.key === 'Enter' && handleActivate()}
+                placeholder="Paste license key…"
+                className="flex-1 min-w-0 px-2.5 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white text-xs placeholder-gray-600 focus:outline-none focus:border-neon-green/60 transition-colors"
+              />
+              <button
+                onClick={handleActivate}
+                disabled={status === 'loading' || !licenseKey.trim()}
+                className="px-3 py-2 rounded-lg bg-slate-800 border border-slate-600 hover:border-neon-green/50 text-neon-green text-xs font-bold transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+              >
+                {status === 'loading' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                Apply
+              </button>
+            </div>
+            {status === 'error' && (
+              <p className="text-[10px] text-red-400 mt-1 text-left">{errorMsg}</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
