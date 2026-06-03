@@ -4,7 +4,7 @@ import { Lock, Check, Zap, Flame, SlidersHorizontal, Percent, Key, Loader2, Info
 interface PremiumPaywallProps {
   isUnlocked: boolean;
   children: ReactNode;
-  onUnlock: () => void;
+  onUnlock: (licenseKey: string) => void;
 }
 
 const FEATURES = [
@@ -60,7 +60,7 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
       });
       const data = await res.json();
       if (data.activated || data.license_key?.status === 'active') {
-        onUnlock();
+        onUnlock(key);
       } else {
         setStatus('error');
         setErrorMsg(data.error || 'Invalid or expired license key.');

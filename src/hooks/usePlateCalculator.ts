@@ -15,6 +15,13 @@ import {
 const STORAGE_KEY = 'platestack_premium_unlocked';
 const SETTINGS_KEY = 'platestack_settings';
 
+// LemonSqueezy license keys are UUID-shaped: 8-4-4-4-12 hex chars
+const LICENSE_KEY_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isValidLicenseKey(val: string | null): boolean {
+  return !!val && LICENSE_KEY_RE.test(val.trim());
+}
+
 function loadSettings() {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
@@ -53,7 +60,7 @@ export function usePlateCalculator() {
   });
   const [isPremiumUnlocked, setIsPremiumUnlocked] = useState<boolean>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored === 'true';
+    return isValidLicenseKey(stored);
   });
 
   const currentPlates = getPlatesByUnit(unit);
@@ -193,9 +200,9 @@ export function usePlateCalculator() {
     setTargetWeightState('');
   };
 
-  const unlockPremium = () => {
+  const unlockPremium = (licenseKey: string) => {
     setIsPremiumUnlocked(true);
-    localStorage.setItem(STORAGE_KEY, 'true');
+    localStorage.setItem(STORAGE_KEY, licenseKey.trim());
   };
 
   const setBarTypePersisted = (bt: BarType) => {
