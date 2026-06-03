@@ -1,5 +1,5 @@
-import { ReactNode, useState } from 'react';
-import { Lock, Check, Zap, Flame, SlidersHorizontal, Percent, Key, Loader2 } from 'lucide-react';
+import { ReactNode, useState, useRef, useEffect } from 'react';
+import { Lock, Check, Zap, Flame, SlidersHorizontal, Percent, Key, Loader2, Info } from 'lucide-react';
 
 interface PremiumPaywallProps {
   isUnlocked: boolean;
@@ -29,6 +29,19 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
   const [licenseKey, setLicenseKey] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [showInfo, setShowInfo] = useState(false);
+  const infoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showInfo) return;
+    const handler = (e: MouseEvent) => {
+      if (infoRef.current && !infoRef.current.contains(e.target as Node)) {
+        setShowInfo(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showInfo]);
 
   if (isUnlocked) {
     return <>{children}</>;
@@ -125,6 +138,23 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
             <div className="flex items-center gap-1.5 mb-1.5">
               <Key className="w-3 h-3 text-gray-500" />
               <span className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Already have a key?</span>
+              {/* Info icon + tooltip */}
+              <div className="relative ml-auto" ref={infoRef}>
+                <button
+                  onClick={() => setShowInfo(v => !v)}
+                  className="w-4 h-4 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-300 transition-colors"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                </button>
+                {showInfo && (
+                  <div className="absolute bottom-full right-0 mb-2 w-52 bg-slate-800 border border-slate-600 rounded-xl shadow-xl p-3 text-left z-10">
+                    <div className="absolute bottom-[-5px] right-2 w-2.5 h-2.5 bg-slate-800 border-r border-b border-slate-600 rotate-45" />
+                    <p className="text-[10px] text-gray-300 leading-relaxed">
+                      After subscribing, <span className="text-neon-green font-semibold">Lemon Squeezy will email you a license key.</span> Paste it here and tap Apply — you only need to do this once. Your access is saved to this device automatically.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex gap-1.5">
               <input
