@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePlateCalculator } from './hooks/usePlateCalculator';
 import { UnitToggle } from './components/UnitToggle';
 import { WeightInput } from './components/WeightInput';
@@ -9,9 +9,14 @@ import { SpecialtyBars } from './components/SpecialtyBars';
 import { PercentageSelector } from './components/PercentageSelector';
 import { MaxPlateSelector } from './components/MaxPlateSelector';
 import { PremiumPaywall } from './components/PremiumPaywall';
+import { LegalModal } from './components/LegalModal';
 import { Dumbbell } from 'lucide-react';
 
+type LegalType = 'privacy' | 'terms' | null;
+
 function App() {
+  const [legalOpen, setLegalOpen] = useState<LegalType>(null);
+
   useEffect(() => {
     if (window.createLemonSqueezy) {
       window.createLemonSqueezy();
@@ -116,22 +121,28 @@ function App() {
           </PremiumPaywall>
         </div>
       </div>
+
       {/* Footer */}
       <div className="w-full max-w-md mt-8 pb-4 flex items-center justify-center gap-4">
-        <a
-          href="/privacy"
+        <button
+          onClick={() => setLegalOpen('privacy')}
           className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors"
         >
           Privacy Policy
-        </a>
+        </button>
         <span className="text-gray-700 text-[10px]">·</span>
-        <a
-          href="/terms"
+        <button
+          onClick={() => setLegalOpen('terms')}
           className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors"
         >
           Terms of Use
-        </a>
+        </button>
       </div>
+
+      {/* Legal modals */}
+      {legalOpen && (
+        <LegalModal type={legalOpen} onClose={() => setLegalOpen(null)} />
+      )}
     </div>
   );
 }
