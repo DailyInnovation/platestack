@@ -24,6 +24,7 @@ function App() {
     targetWeight,
     setTargetWeight,
     manualAddPlate,
+    manualAddCustomPlate,
     clearBar,
     barType,
     setBarType,
@@ -72,6 +73,7 @@ function App() {
         <PlateButtons
           plates={currentPlates}
           onAddPlate={manualAddPlate}
+          onAddCustomPlate={manualAddCustomPlate}
           onClearBar={clearBar}
           maxPlateConfig={maxPlateConfig}
         />

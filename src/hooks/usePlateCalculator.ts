@@ -13,16 +13,43 @@ import {
 } from '../utils/calculations';
 
 const STORAGE_KEY = 'platestack_premium_unlocked';
+const SETTINGS_KEY = 'platestack_settings';
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function saveSettings(patch: Record<string, unknown>) {
+  try {
+    const existing = loadSettings() || {};
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...existing, ...patch }));
+  } catch {}
+}
 
 export function usePlateCalculator() {
-  const [unit, setUnit] = useState<UnitSystem>('kg');
+  const [unit, setUnit] = useState<UnitSystem>(() => {
+    const s = loadSettings();
+    return (s?.unit as UnitSystem) || 'kg';
+  });
   const [targetWeightState, setTargetWeightState] = useState<string>('');
   const [manualPlates, setManualPlatesState] = useState<LoadedPlate[]>([]);
-  const [barType, setBarType] = useState<BarType>('standard');
-  const [customBarWeight, setCustomBarWeight] = useState<string>('');
-  const [maxPlateConfig, setMaxPlateConfigState] = useState<MaxPlateConfig>({
-    enabled: false,
-    maxPlateWeight: null,
+  const [barType, setBarType] = useState<BarType>(() => {
+    const s = loadSettings();
+    return (s?.barType as BarType) || 'standard';
+  });
+  const [customBarWeight, setCustomBarWeight] = useState<string>(() => {
+    const s = loadSettings();
+    return s?.customBarWeight || '';
+  });
+  const [maxPlateConfig, setMaxPlateConfigState] = useState<MaxPlateConfig>(() => {
+    const s = loadSettings();
+    return s?.maxPlateConfig || { enabled: false, maxPlateWeight: null };
   });
   const [isPremiumUnlocked, setIsPremiumUnlocked] = useState<boolean>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -68,6 +95,7 @@ export function usePlateCalculator() {
 
   // When max plate limit changes, remove any manual plates that now violate it
   const setMaxPlateConfig = (config: MaxPlateConfig) => {
+    saveSettings({ maxPlateConfig: config });
     setMaxPlateConfigState(config);
     if (config.enabled && config.maxPlateWeight != null) {
       setManualPlatesState(prev => {
@@ -94,21 +122,26 @@ export function usePlateCalculator() {
       setTargetWeightState(convertedWeight.toString());
     }
 
+    let newCustomBarWeight = customBarWeight;
     if (customBarWeight) {
       const currentCustom = parseFloat(customBarWeight);
       const convertedCustom = convertWeight(currentCustom, unit, newUnit);
-      setCustomBarWeight(convertedCustom.toString());
+      newCustomBarWeight = convertedCustom.toString();
+      setCustomBarWeight(newCustomBarWeight);
     }
 
+    let newMaxPlateConfig = maxPlateConfig;
     if (maxPlateConfig.enabled && maxPlateConfig.maxPlateWeight) {
       const convertedMaxPlate = convertWeight(maxPlateConfig.maxPlateWeight, unit, newUnit);
       const availablePlates = getPlatesByUnit(newUnit);
       const closestPlate = availablePlates.reduce((prev, curr) =>
         Math.abs(curr.weight - convertedMaxPlate) < Math.abs(prev.weight - convertedMaxPlate) ? curr : prev
       );
-      setMaxPlateConfigState({ enabled: true, maxPlateWeight: closestPlate.weight });
+      newMaxPlateConfig = { enabled: true, maxPlateWeight: closestPlate.weight };
+      setMaxPlateConfigState(newMaxPlateConfig);
     }
 
+    saveSettings({ unit: newUnit, customBarWeight: newCustomBarWeight, maxPlateConfig: newMaxPlateConfig });
     setManualPlatesState([]);
     setUnit(newUnit);
   };
@@ -131,6 +164,30 @@ export function usePlateCalculator() {
     });
   };
 
+  // Add a custom weight plate not in the standard denominations list
+  const manualAddCustomPlate = (plateWeight: number): void => {
+    if (isNaN(plateWeight) || plateWeight <= 0) return;
+    if (maxPlateConfig.enabled && maxPlateConfig.maxPlateWeight && plateWeight > maxPlateConfig.maxPlateWeight) return;
+
+    const customPlate = {
+      weight: plateWeight,
+      color: 'plate-silver',
+      name: `${plateWeight} ${unit}`,
+      width: 0.8,
+    };
+
+    setManualPlatesState(prev => {
+      const existing = prev.find(p => p.weight === plateWeight);
+      const newPlates = existing
+        ? prev.map(p => p.weight === plateWeight ? { ...p, count: p.count + 1 } : p)
+        : [...prev, { ...customPlate, count: 1 }];
+
+      const newTotal = calculateTotalWeight(newPlates, barbellConfig.weight);
+      setTargetWeightState(String(newTotal));
+      return newPlates;
+    });
+  };
+
   const clearBar = () => {
     setManualPlatesState([]);
     setTargetWeightState('');
@@ -141,6 +198,16 @@ export function usePlateCalculator() {
     localStorage.setItem(STORAGE_KEY, 'true');
   };
 
+  const setBarTypePersisted = (bt: BarType) => {
+    saveSettings({ barType: bt });
+    setBarType(bt);
+  };
+
+  const setCustomBarWeightPersisted = (w: string) => {
+    saveSettings({ customBarWeight: w });
+    setCustomBarWeight(w);
+  };
+
   return {
     unit,
     toggleUnit,
@@ -148,11 +215,12 @@ export function usePlateCalculator() {
     setTargetWeight,
     manualPlates,
     manualAddPlate,
+    manualAddCustomPlate,
     clearBar,
     barType,
-    setBarType,
+    setBarType: setBarTypePersisted,
     customBarWeight,
-    setCustomBarWeight,
+    setCustomBarWeight: setCustomBarWeightPersisted,
     barbellConfig,
     platesPerSide,
     totalWeight,

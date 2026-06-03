@@ -1,14 +1,20 @@
+import { useState, useRef } from 'react';
 import { PlateDenomination, MaxPlateConfig } from '../types';
-import { Minus, RotateCcw } from 'lucide-react';
+import { RotateCcw, Plus, Check, X } from 'lucide-react';
 
 interface PlateButtonsProps {
   plates: PlateDenomination[];
   onAddPlate: (weight: number) => void;
+  onAddCustomPlate: (weight: number) => void;
   onClearBar: () => void;
   maxPlateConfig?: MaxPlateConfig;
 }
 
-export function PlateButtons({ plates, onAddPlate, onClearBar, maxPlateConfig }: PlateButtonsProps) {
+export function PlateButtons({ plates, onAddPlate, onAddCustomPlate, onClearBar, maxPlateConfig }: PlateButtonsProps) {
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customValue, setCustomValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const getColorClass = (color: string): string => {
     const colorMap: Record<string, string> = {
       'plate-red': 'bg-red-600 hover:bg-red-500 border-red-400',
@@ -20,6 +26,31 @@ export function PlateButtons({ plates, onAddPlate, onClearBar, maxPlateConfig }:
       'plate-silver': 'bg-gray-400 hover:bg-gray-300 border-gray-300',
     };
     return colorMap[color] || 'bg-gray-500 hover:bg-gray-400 border-gray-400';
+  };
+
+  const handleOpenCustom = () => {
+    setShowCustomInput(true);
+    setCustomValue('');
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const handleConfirmCustom = () => {
+    const val = parseFloat(customValue);
+    if (!isNaN(val) && val > 0) {
+      onAddCustomPlate(val);
+    }
+    setShowCustomInput(false);
+    setCustomValue('');
+  };
+
+  const handleCancelCustom = () => {
+    setShowCustomInput(false);
+    setCustomValue('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleConfirmCustom();
+    if (e.key === 'Escape') handleCancelCustom();
   };
 
   return (
@@ -53,6 +84,43 @@ export function PlateButtons({ plates, onAddPlate, onClearBar, maxPlateConfig }:
             </button>
           );
         })}
+
+        {/* Custom plate button */}
+        {showCustomInput ? (
+          <div className="col-span-1 flex items-center gap-1">
+            <input
+              ref={inputRef}
+              type="number"
+              value={customValue}
+              onChange={e => setCustomValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="kg"
+              className="w-full py-2 px-2 rounded-lg border-2 border-neon-green/50 bg-slate-900 text-white text-xs font-bold text-center focus:outline-none focus:border-neon-green"
+              min="0.25"
+              step="0.25"
+            />
+            <button
+              onClick={handleConfirmCustom}
+              className="p-1.5 rounded-lg bg-neon-green/20 border border-neon-green/50 text-neon-green hover:bg-neon-green/30 transition-all active:scale-95"
+            >
+              <Check className="w-3 h-3" />
+            </button>
+            <button
+              onClick={handleCancelCustom}
+              className="p-1.5 rounded-lg bg-slate-800 border border-slate-600 text-gray-400 hover:text-gray-200 transition-all active:scale-95"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleOpenCustom}
+            className="py-2.5 px-2 rounded-lg border-2 border-dashed border-slate-600 hover:border-neon-green/60 text-slate-500 hover:text-neon-green font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1"
+          >
+            <Plus className="w-3 h-3" />
+            Custom
+          </button>
+        )}
       </div>
     </div>
   );
