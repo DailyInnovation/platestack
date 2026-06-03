@@ -1,4 +1,10 @@
 import { useEffect, useState } from 'react';
+
+declare global {
+  interface Window {
+    createLemonSqueezy?: () => void;
+  }
+}
 import { usePlateCalculator } from './hooks/usePlateCalculator';
 import { UnitToggle } from './components/UnitToggle';
 import { WeightInput } from './components/WeightInput';

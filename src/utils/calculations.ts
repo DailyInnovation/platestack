@@ -1,4 +1,4 @@
-import { LoadedPlate, PlateDenomination, BarbellConfig, WarmupSet, PercentageRow } from '../types';
+import { LoadedPlate, PlateDenomination, WarmupSet, PercentageRow } from '../types';
 
 export function calculatePlatesPerSide(
   targetWeight: number,
