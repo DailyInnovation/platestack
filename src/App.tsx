@@ -12,7 +12,7 @@ import { PremiumPaywall } from './components/PremiumPaywall';
 import { LegalModal } from './components/LegalModal';
 import { Dumbbell } from 'lucide-react';
 
-type LegalType = 'privacy' | 'terms' | null;
+type LegalType = 'privacy' | 'terms' | 'contact' | null;
 
 function App() {
   const [legalOpen, setLegalOpen] = useState<LegalType>(null);
@@ -137,11 +137,43 @@ function App() {
         >
           Terms of Use
         </button>
+        <span className="text-gray-700 text-[10px]">·</span>
+        <button
+          onClick={() => setLegalOpen('contact')}
+          className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors"
+        >
+          Contact
+        </button>
       </div>
 
       {/* Legal modals */}
-      {legalOpen && (
+      {legalOpen && legalOpen !== 'contact' && (
         <LegalModal type={legalOpen} onClose={() => setLegalOpen(null)} />
+      )}
+
+      {/* Contact popup */}
+      {legalOpen === 'contact' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={() => setLegalOpen(null)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div
+            className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl px-6 py-5 w-full max-w-xs text-center"
+            onClick={e => e.stopPropagation()}
+          >
+            <p className="text-xs text-gray-400 mb-2">Have a question or feedback?</p>
+            <a
+              href="mailto:daily.innovation12@gmail.com"
+              className="text-sm font-bold text-neon-green hover:text-emerald-400 transition-colors break-all"
+            >
+              daily.innovation12@gmail.com
+            </a>
+            <button
+              onClick={() => setLegalOpen(null)}
+              className="mt-4 w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-400 text-xs font-semibold transition-all active:scale-95"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
