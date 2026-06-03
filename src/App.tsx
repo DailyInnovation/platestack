@@ -25,6 +25,9 @@ function App() {
     setTargetWeight,
     manualAddPlate,
     manualAddCustomPlate,
+    savedCustomPlates,
+    addSavedCustomPlate,
+    removeSavedCustomPlate,
     clearBar,
     barType,
     setBarType,
@@ -72,10 +75,14 @@ function App() {
 
         <PlateButtons
           plates={currentPlates}
+          savedCustomPlates={savedCustomPlates}
           onAddPlate={manualAddPlate}
           onAddCustomPlate={manualAddCustomPlate}
+          onAddSavedCustomPlate={addSavedCustomPlate}
+          onRemoveSavedCustomPlate={removeSavedCustomPlate}
           onClearBar={clearBar}
           maxPlateConfig={maxPlateConfig}
+          unit={unit}
         />
 
         <div className="mt-4 space-y-2">
