@@ -55,10 +55,6 @@ export function usePlateCalculator() {
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored === 'true';
   });
-  const [savedCustomPlates, setSavedCustomPlatesState] = useState<number[]>(() => {
-    const s = loadSettings();
-    return Array.isArray(s?.savedCustomPlates) ? s.savedCustomPlates : [];
-  });
 
   const currentPlates = getPlatesByUnit(unit);
 
@@ -168,7 +164,7 @@ export function usePlateCalculator() {
     });
   };
 
-  // Load a custom weight onto the bar (not necessarily in the standard list)
+  // Add a custom weight plate not in the standard denominations list
   const manualAddCustomPlate = (plateWeight: number): void => {
     if (isNaN(plateWeight) || plateWeight <= 0) return;
     if (maxPlateConfig.enabled && maxPlateConfig.maxPlateWeight && plateWeight > maxPlateConfig.maxPlateWeight) return;
@@ -189,26 +185,6 @@ export function usePlateCalculator() {
       const newTotal = calculateTotalWeight(newPlates, barbellConfig.weight);
       setTargetWeightState(String(newTotal));
       return newPlates;
-    });
-  };
-
-  // Save a custom plate denomination (max 6) and immediately load it onto the bar
-  const addSavedCustomPlate = (plateWeight: number): void => {
-    if (isNaN(plateWeight) || plateWeight <= 0) return;
-    setSavedCustomPlatesState(prev => {
-      if (prev.includes(plateWeight) || prev.length >= 6) return prev;
-      const next = [...prev, plateWeight].sort((a, b) => b - a);
-      saveSettings({ savedCustomPlates: next });
-      return next;
-    });
-    manualAddCustomPlate(plateWeight);
-  };
-
-  const removeSavedCustomPlate = (plateWeight: number): void => {
-    setSavedCustomPlatesState(prev => {
-      const next = prev.filter(w => w !== plateWeight);
-      saveSettings({ savedCustomPlates: next });
-      return next;
     });
   };
 
@@ -240,9 +216,6 @@ export function usePlateCalculator() {
     manualPlates,
     manualAddPlate,
     manualAddCustomPlate,
-    savedCustomPlates,
-    addSavedCustomPlate,
-    removeSavedCustomPlate,
     clearBar,
     barType,
     setBarType: setBarTypePersisted,
