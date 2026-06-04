@@ -122,7 +122,7 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
 
           {/* CTA */}
           <a
-            href="https://dailyinnovation12.lemonsqueezy.com/checkout/buy/b84ffec5-e864-46a0-a5e5-965310c96a43?embed=1"
+            <a href="https://dailyinnovation12.lemonsqueezy.com/checkout/buy/b84ffec5-e864-46a0-a5e5-965310c96a43?embed=1" class="lemonsqueezy-button">Buy PlateStack</a><script src="https://assets.lemonsqueezy.com/lemon.js" defer></script>
             className="lemonsqueezy-button w-full max-w-[260px] flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-black text-sm text-slate-900 bg-gradient-to-r from-neon-green to-emerald-400 hover:from-emerald-400 hover:to-neon-green active:scale-95 transition-all shadow-lg shadow-neon-green/20 no-underline"
           >
             <Zap className="w-4 h-4" />
