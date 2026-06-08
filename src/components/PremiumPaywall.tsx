@@ -53,17 +53,18 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
     setStatus('loading');
     setErrorMsg('');
     try {
-      const res = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
+      const body = new URLSearchParams({ product_id: 'rfjohf', license_key: key });
+      const res = await fetch('https://api.gumroad.com/v2/licenses/verify', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ license_key: key, instance_name: 'PlateStack' }),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
       });
       const data = await res.json();
-      if (data.activated || data.license_key?.status === 'active') {
+      if (data.success) {
         onUnlock(key);
       } else {
         setStatus('error');
-        setErrorMsg(data.error || 'Invalid or expired license key.');
+        setErrorMsg(data.message || 'Invalid or expired license key.');
       }
     } catch {
       setStatus('error');
@@ -151,7 +152,7 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
                   <div className="absolute bottom-full right-0 mb-2 w-52 bg-slate-800 border border-slate-600 rounded-xl shadow-xl p-3 text-left z-10">
                     <div className="absolute bottom-[-5px] right-2 w-2.5 h-2.5 bg-slate-800 border-r border-b border-slate-600 rotate-45" />
                     <p className="text-[10px] text-gray-300 leading-relaxed">
-                      After subscribing, <span className="text-neon-green font-semibold">Lemon Squeezy will email you a license key.</span> Paste it here and tap Apply — you only need to do this once. Your access is saved to this device automatically.
+                      After purchasing, <span className="text-neon-green font-semibold">Gumroad will email you a license key.</span> Paste it here and tap Apply — you only need to do this once. Your access is saved to this device automatically.
                     </p>
                   </div>
                 )}

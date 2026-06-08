@@ -15,8 +15,8 @@ import {
 const STORAGE_KEY = 'platestack_premium_unlocked';
 const SETTINGS_KEY = 'platestack_settings';
 
-// LemonSqueezy license keys are UUID-shaped: 8-4-4-4-12 hex chars
-const LICENSE_KEY_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// Gumroad license keys are shaped: 8-8-8-8 hex chars (e.g. A1B2C3D4-E5F6A7B8-C9D0E1F2-A3B4C5D6)
+const LICENSE_KEY_RE = /^[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$/i;
 
 function isValidLicenseKey(val: string | null): boolean {
   return !!val && LICENSE_KEY_RE.test(val.trim());
