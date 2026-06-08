@@ -122,8 +122,9 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
 
           {/* CTA */}
           <a
-            href=""
-            className="lemonsqueezy-button w-full max-w-[260px] flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-black text-sm text-slate-900 bg-gradient-to-r from-neon-green to-emerald-400 hover:from-emerald-400 hover:to-neon-green active:scale-95 transition-all shadow-lg shadow-neon-green/20 no-underline"
+            href="https://dailyinnovation.gumroad.com/l/rfjohf"
+            data-gumroad-overlay-checkout="true"
+            className="w-full max-w-[260px] flex items-center justify-center gap-2 py-3 px-5 rounded-xl font-black text-sm text-slate-900 bg-gradient-to-r from-neon-green to-emerald-400 hover:from-emerald-400 hover:to-neon-green active:scale-95 transition-all shadow-lg shadow-neon-green/20 no-underline"
           >
             <Zap className="w-4 h-4" />
             Unlock Pro — $3/month
