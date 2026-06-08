@@ -53,7 +53,7 @@ export function PremiumPaywall({ isUnlocked, children, onUnlock }: PremiumPaywal
     setStatus('loading');
     setErrorMsg('');
     try {
-      const body = new URLSearchParams({ product_id: 'rfjohf', license_key: key });
+      const body = new URLSearchParams({ product_id: '-_fGsvjLsZgrpthpDfoH0g==', license_key: key });
       const res = await fetch('https://api.gumroad.com/v2/licenses/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
