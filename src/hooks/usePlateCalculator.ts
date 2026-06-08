@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { UnitSystem, LoadedPlate, BarType, MaxPlateConfig } from '../types';
 import {
   getPlatesByUnit,
@@ -62,6 +62,41 @@ export function usePlateCalculator() {
     const stored = localStorage.getItem(STORAGE_KEY);
     return isValidLicenseKey(stored);
   });
+
+  // Silently re-validate stored key against Gumroad on mount.
+  // Revokes access if subscription was cancelled, refunded, or disputed.
+  // Fails open on network errors so users aren't locked out by connectivity issues.
+  useEffect(() => {
+    const storedKey = localStorage.getItem(STORAGE_KEY);
+    if (!isValidLicenseKey(storedKey)) return;
+
+    fetch('https://api.gumroad.com/v2/licenses/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        product_id: '-_fGsvjLsZgrpthpDfoH0g==',
+        license_key: storedKey!.trim(),
+        increment_uses_count: 'false',
+      }).toString(),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success) { revoke(); return; }
+        const p = data.purchase;
+        const dead =
+          p.refunded ||
+          (p.disputed && !p.dispute_won) ||
+          p.subscription_ended_at != null ||
+          p.subscription_cancelled_at != null;
+        if (dead) revoke();
+      })
+      .catch(() => { /* network failure — keep access */ });
+
+    function revoke() {
+      localStorage.removeItem(STORAGE_KEY);
+      setIsPremiumUnlocked(false);
+    }
+  }, []);
 
   const currentPlates = getPlatesByUnit(unit);
 
