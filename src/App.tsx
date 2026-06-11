@@ -11,7 +11,6 @@ import { PercentageSelector } from './components/PercentageSelector';
 import { MaxPlateSelector } from './components/MaxPlateSelector';
 import { PremiumPaywall } from './components/PremiumPaywall';
 import { LegalModal } from './components/LegalModal';
-import { InstallBanner } from './components/InstallBanner';
 import { Dumbbell } from 'lucide-react';
 
 type LegalType = 'privacy' | 'terms' | 'contact' | null;
@@ -118,11 +117,8 @@ function App() {
         </div>
       </div>
 
-      {/* Install banner */}
-      <InstallBanner />
-
       {/* Footer */}
-      <div className="w-full max-w-md mt-0 pb-4 flex items-center justify-center gap-4">
+      <div className="w-full max-w-md mt-8 pb-4 flex items-center justify-center gap-4">
         <button
           onClick={() => setLegalOpen('privacy')}
           className="text-[10px] text-gray-600 hover:text-gray-400 transition-colors"
