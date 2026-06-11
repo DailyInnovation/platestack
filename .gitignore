@@ -11,6 +11,12 @@ dist
 dist-ssr
 *.local
 
+# Vite cache
+.vite
+
+# Duplicate local copy
+platestack-main/
+
 .vscode/*
 !.vscode/extensions.json
 .idea
