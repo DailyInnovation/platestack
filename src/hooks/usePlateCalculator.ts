@@ -14,8 +14,6 @@ import {
 
 const STORAGE_KEY = 'platestack_premium_unlocked';
 const SETTINGS_KEY = 'platestack_settings';
-const VALIDATION_CACHE_KEY = 'platestack_validation_ts';
-const VALIDATION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Gumroad license keys are shaped: 8-8-8-8 hex chars (e.g. A1B2C3D4-E5F6A7B8-C9D0E1F2-A3B4C5D6)
 const LICENSE_KEY_RE = /^[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}-[0-9a-f]{8}$/i;
@@ -66,16 +64,11 @@ export function usePlateCalculator() {
   });
 
   // Silently re-validate stored key against Gumroad on mount.
-  // Skips the API call if a successful validation was cached within the last 24 hours
-  // so the app works fully offline after first use.
   // Revokes access if subscription was cancelled, refunded, or disputed.
   // Fails open on network errors so users aren't locked out by connectivity issues.
   useEffect(() => {
     const storedKey = localStorage.getItem(STORAGE_KEY);
     if (!isValidLicenseKey(storedKey)) return;
-
-    const lastValidated = Number(localStorage.getItem(VALIDATION_CACHE_KEY) || 0);
-    if (Date.now() - lastValidated < VALIDATION_TTL_MS) return; // still fresh — skip
 
     fetch('https://api.gumroad.com/v2/licenses/verify', {
       method: 'POST',
@@ -95,14 +88,12 @@ export function usePlateCalculator() {
           (p.disputed && !p.dispute_won) ||
           p.subscription_ended_at != null ||
           p.subscription_cancelled_at != null;
-        if (dead) { revoke(); return; }
-        localStorage.setItem(VALIDATION_CACHE_KEY, String(Date.now())); // cache success
+        if (dead) revoke();
       })
-      .catch(() => { /* network failure — keep access, retry next session */ });
+      .catch(() => { /* network failure — keep access */ });
 
     function revoke() {
       localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(VALIDATION_CACHE_KEY);
       setIsPremiumUnlocked(false);
     }
   }, []);
