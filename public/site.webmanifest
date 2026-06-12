@@ -1,0 +1,15 @@
+{
+  "name": "PlateStack",
+  "short_name": "PlateStack",
+  "icons": [
+    {
+      "src": "/d6b9ab030fc0e92c81dfacbf_edited.svg",
+      "sizes": "256x256",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}
