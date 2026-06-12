@@ -36,12 +36,6 @@ export interface WarmupSet {
   reps: number;
 }
 
-export interface PercentageRow {
-  percentage: number;
-  weight: number;
-  plates: LoadedPlate[];
-}
-
 export type BarType = 'technique' | 'standard' | 'squat' | 'custom';
 
 export interface MaxPlateConfig {

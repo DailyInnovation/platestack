@@ -1,4 +1,4 @@
-import { LoadedPlate, PlateDenomination, WarmupSet, PercentageRow } from '../types';
+import { LoadedPlate, PlateDenomination, WarmupSet } from '../types';
 
 export function calculatePlatesPerSide(
   targetWeight: number,
@@ -58,25 +58,5 @@ export function generateWarmupSets(
     const weight = Math.round((targetWeight * (percentage / 100)) / 2.5) * 2.5;
     const warmupPlates = calculatePlatesPerSide(weight, barbellWeight, plates, maxPlateWeight);
     return { percentage, weight, plates: warmupPlates, reps };
-  });
-}
-
-export function generatePercentageMatrix(
-  targetWeight: number,
-  barbellWeight: number,
-  plates: PlateDenomination[],
-  maxPlateWeight?: number | null
-): PercentageRow[] {
-  const percentages = [65, 75, 85, 95];
-
-  return percentages.map(percentage => {
-    const weight = Math.round((targetWeight * (percentage / 100)) / 2.5) * 2.5;
-    const percentPlates = calculatePlatesPerSide(weight, barbellWeight, plates, maxPlateWeight);
-
-    return {
-      percentage,
-      weight,
-      plates: percentPlates,
-    };
   });
 }
