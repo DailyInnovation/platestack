@@ -11,12 +11,13 @@ import { PercentageSelector } from './components/PercentageSelector';
 import { MaxPlateSelector } from './components/MaxPlateSelector';
 import { PremiumPaywall } from './components/PremiumPaywall';
 import { LegalModal } from './components/LegalModal';
-import { Dumbbell } from 'lucide-react';
+import { Dumbbell, Info } from 'lucide-react';
 
 type LegalType = 'privacy' | 'terms' | 'contact' | null;
 
 function App() {
   const [legalOpen, setLegalOpen] = useState<LegalType>(null);
+  const [hintOpen, setHintOpen] = useState(false);
 
   const {
     unit,
@@ -50,7 +51,30 @@ function App() {
 
       <div className="relative w-full max-w-md space-y-4 animate-fade-in">
         {/* Header */}
-        <div className="text-center mb-4">
+        <div className="relative text-center mb-4">
+          <button
+            type="button"
+            onClick={() => setHintOpen(v => !v)}
+            className="absolute top-0 right-0 text-slate-300 bg-slate-900/80 hover:bg-slate-800 border border-slate-700 rounded-full p-2 shadow-lg shadow-black/40 transition-colors"
+            aria-label="Show usage hint"
+          >
+            <Info className="w-4 h-4" />
+          </button>
+          {hintOpen && (
+            <div className="absolute top-10 right-0 z-10 w-72 rounded-2xl border border-slate-700 bg-slate-950/95 p-4 text-left shadow-2xl shadow-black/50">
+              <p className="text-[11px] text-gray-400 mb-2 font-semibold">Quick Tip</p>
+              <p className="text-xs text-gray-300 leading-relaxed mb-2">
+                For faster access, add PlateStack to your home screen.
+              </p>
+              <p className="text-xs text-gray-300 leading-relaxed mb-2">
+                The calculator always loads the nearest lower valid weight on the bar.
+              </p>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                If the smallest step is too small, use the custom plate button to add a custom increment.
+              </p>
+            </div>
+          )}
+
           <div className="flex items-center justify-center gap-2 mb-1">
             <Dumbbell className="w-6 h-6 text-neon-green" />
             <h1 className="text-2xl font-black bg-gradient-to-r from-neon-green via-emerald-400 to-neon-cyan bg-clip-text text-transparent">
